@@ -19,12 +19,20 @@ export class Segment implements ISegment {
         return this._b;
     }
 
-    draw(ctx: CanvasRenderingContext2D, width: number = 2, color: Color = Color.Black): void {
+    public equals(segment: ISegment): boolean {
+        return this.includes(segment.pointA) && this.includes(segment.pointB);
+    }
+
+    public draw(ctx: CanvasRenderingContext2D, width: number = 2, color: Color = Color.Black): void {
         ctx.beginPath();
         ctx.lineWidth = width;
         ctx.strokeStyle = color;
         ctx.moveTo(this._a.x, this._a.y);
         ctx.lineTo(this._b.x, this._b.y);
         ctx.stroke();
+    }
+
+    private includes(point: IPoint): boolean {
+        return this.pointA.equals(point) || this.pointB.equals(point);
     }
 }

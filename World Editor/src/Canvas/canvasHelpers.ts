@@ -9,7 +9,12 @@ export function initializeCanvas(id: string): HTMLCanvasElement {
     canvas.height = CANVAS_SIZE_HEIGHT;
     canvas.style.border = '1px solid'
 
-    document.body.appendChild(canvas);
+    document.body.childNodes[1].after(canvas);
+    //document.body.appendChild(canvas);
 
     return canvas;
+}
+
+export function clearCanvas(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void{
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }

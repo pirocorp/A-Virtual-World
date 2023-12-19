@@ -21,6 +21,10 @@ export class Point implements IPoint {
         return this._y;
     }
 
+    equals(point: IPoint): boolean {
+        return this._x === point.x && this._y === point.y;
+    }
+
     draw(ctx: CanvasRenderingContext2D, size: number = 18, color: Color = Color.Black): void {    
         const radius = size / 2;
 

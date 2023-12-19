@@ -11,7 +11,33 @@ export class Graph implements IGraph{
         this._segments = segments;
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    public get points(): IPoint[] {
+        return this._points.map(x => x);
+    }
+
+    public get segments(): ISegment[] {
+        return this._segments.map(x => x);
+    }
+
+    public tryAddPoint(point: IPoint): boolean{
+        if(this.containsPoint(point)){
+            return false;
+        }
+
+        this._points.push(point);
+        return true;
+    }
+
+    public tryAddSegment(segment: ISegment): boolean{
+        if(this.containsSegment(segment) || segment.pointA.equals(segment.pointB)){
+            return false;
+        }
+        
+        this._segments.push(segment);
+        return true;
+    }
+
+    public draw(ctx: CanvasRenderingContext2D): void {
         for(const segment of this._segments){
             segment.draw(ctx);
         }
@@ -19,5 +45,13 @@ export class Graph implements IGraph{
         for(const point of this._points){
             point.draw(ctx);
         }
+    }
+
+    private containsPoint(point: IPoint): boolean{
+        return this._points.some(p => p.equals(point))
+    }
+
+    private containsSegment(segment: ISegment): boolean{
+        return this._segments.some(s => s.equals(segment));
     }
 }
