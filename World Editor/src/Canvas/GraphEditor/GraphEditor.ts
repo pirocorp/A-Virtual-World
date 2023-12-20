@@ -1,14 +1,15 @@
-import { IGraphEditor } from "./IGraphEditor";
-import { IGraph } from "../Graph/IGraph";
 import { CANVAS_ID, CANVAS_SIZE_HEIGHT, CANVAS_SIZE_WIDTH } from "../../globalConstants";
-import { Point } from "../Graph/Point/Point";
-import { Segment } from "../Graph/Segment/Segment";
+
+import { IGraph } from "../Graph/IGraph";
+import { IGraphEditor } from "./IGraphEditor";
 import { IPoint } from "../Graph/Point/IPoint";
 import { IPointOptions } from "../Graph/Point/IPointOptions";
-import { Color } from "../Color";
-import { MouseButton } from "../MouseButton";
 import { ISegment } from "../Graph/Segment/ISegment";
 import { ISegmentOptions } from "../Graph/Segment/ISegmentOptions";
+import { Point } from "../Graph/Point/Point";
+import { Segment } from "../Graph/Segment/Segment";
+import { Color } from "../Color";
+import { MouseButton } from "../MouseButton";
 
 export class GraphEditor implements IGraphEditor {
     private readonly _pointTresholdDistance: number = 10;
@@ -120,40 +121,24 @@ export class GraphEditor implements IGraphEditor {
         return canvas;
     }
 
-    private addEventListeners() {
+    private addEventListeners(): void {
         this._canvas.addEventListener("mousedown", this.onMouseDownEventHandler);
         this._canvas.addEventListener("mousemove", this.onMouseMoveEventHandler);
         this._canvas.addEventListener("contextmenu", this.onContextMenuEventHandler);
         this._canvas.addEventListener("mouseup", this.onMouseUpEventHandler);
     }
 
-    private onMouseDownEventHandler(mouseEvent: MouseEvent) {
+    private onMouseDownEventHandler(mouseEvent: MouseEvent): void {
         if(mouseEvent.button == MouseButton.RigthClick) {           
-            if(this._hovered){
-                this.removePoint(this._hovered);
-            } else {
-                this._selected = null;
-            }
+            this.handleRightClick();
         }
 
         if(mouseEvent.button == MouseButton.LeftClick) {
-            if(this._hovered) {
-                this.selectPoint(this._hovered);
-                this._dragging = true;
-
-                return
-            }
-    
-            const success = this._graph.tryAddPoint(this._mouse);
-    
-            if(success){
-                this.selectPoint(this._mouse);
-                this._hovered = this._mouse; 
-            }
+            this.handleLeftClick();
         }        
     } 
     
-    private onMouseMoveEventHandler(mouseEvent: MouseEvent) {
+    private onMouseMoveEventHandler(mouseEvent: MouseEvent): void {
         this._mouse = new Point(mouseEvent.offsetX, mouseEvent.offsetY);
         this._hovered = Point.getNearestPoint(this._mouse, this._graph.points, this._pointTresholdDistance);
 
@@ -162,12 +147,36 @@ export class GraphEditor implements IGraphEditor {
         }
     }
 
-    private onMouseUpEventHandler(mouseEvent: MouseEvent) {
+    private onMouseUpEventHandler(mouseEvent: MouseEvent): void {
         this._dragging = false;
     }
 
-    private onContextMenuEventHandler(mouseEvent: MouseEvent) {
+    private onContextMenuEventHandler(mouseEvent: MouseEvent): void {
         mouseEvent.preventDefault();
+    }
+
+    private handleLeftClick(): void {
+        if(this._hovered) {
+            this.selectPoint(this._hovered);
+            this._dragging = true;
+
+            return
+        }
+
+        const success = this._graph.tryAddPoint(this._mouse);
+
+        if(success){
+            this.selectPoint(this._mouse);
+            this._hovered = this._mouse; 
+        }
+    }
+
+    private handleRightClick(): void {
+        if(this._selected) {
+            this._selected = null;
+        } else if(this._hovered) {
+            this.removePoint(this._hovered);
+        }
     }
 
     private selectPoint(point: IPoint) {
