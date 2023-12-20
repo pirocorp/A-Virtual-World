@@ -7,5 +7,7 @@ export interface ISegment {
 
     equals(segment: ISegment): boolean;
 
+    includes(point: IPoint): boolean;
+
     draw(ctx: CanvasRenderingContext2D, width?: number, color?: Color): void;
 }

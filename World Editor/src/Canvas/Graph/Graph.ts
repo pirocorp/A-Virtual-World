@@ -3,14 +3,14 @@ import { IPoint } from "./Point/IPoint";
 import { ISegment } from "./Segment/ISegment";
 
 export class Graph implements IGraph{
-    private readonly _points: IPoint[];
-    private readonly _segments: ISegment[];
+    protected readonly _points: IPoint[];
+    protected readonly _segments: ISegment[];
 
     constructor(points: IPoint[] = [], segments: ISegment[] = []){
         this._points = points;
         this._segments = segments;
     }
-
+    
     public get points(): IPoint[] {
         return this._points.map(x => x);
     }
@@ -37,14 +37,46 @@ export class Graph implements IGraph{
         return true;
     }
 
-    public draw(ctx: CanvasRenderingContext2D): void {
-        for(const segment of this._segments){
-            segment.draw(ctx);
+    public tryRemovePoint(point: IPoint): boolean {
+        if(this._points.length == 0){        
+            return false;
         }
 
-        for(const point of this._points){
-            point.draw(ctx);
+        const index = this._points.indexOf(point);
+
+        if(index < 0){
+            return false;
         }
+
+        const segments = this.getSegmentsContainingPoint(point);
+
+        for (const segment of segments) {
+            this.tryRemoveSegment(segment);
+        }
+
+        this._points.splice(index, 1);
+
+        return true;
+    }
+
+    public tryRemoveSegment(segment: ISegment): boolean {
+        if(this._segments.length == 0){        
+            return false;
+        }
+
+        const index = this._segments.indexOf(segment);
+
+        if(index < 0){
+            return false;
+        }
+
+        this._segments.splice(index, 1);
+        return true;
+    }
+
+    public dispose(): void {
+        this._points.length = 0;
+        this._segments.length = 0;
     }
 
     private containsPoint(point: IPoint): boolean{
@@ -53,5 +85,17 @@ export class Graph implements IGraph{
 
     private containsSegment(segment: ISegment): boolean{
         return this._segments.some(s => s.equals(segment));
+    }
+
+    private getSegmentsContainingPoint(point: IPoint): ISegment[] {
+        let segments: ISegment[] = [];
+
+        for (const segment of this._segments) {
+            if(segment.includes(point)){
+                segments.push(segment);
+            }
+        }
+
+        return segments;
     }
 }

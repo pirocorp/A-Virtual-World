@@ -1,7 +1,7 @@
 import { CANVAS_SIZE_WIDTH } from "../globalConstants";
 import { CANVAS_SIZE_HEIGHT } from "../globalConstants";
 
-export function initializeCanvas(id: string): HTMLCanvasElement {
+export function initializeCanvas(id: string, container: HTMLElement): HTMLCanvasElement {
     const canvas = <HTMLCanvasElement>document.createElement('canvas');
 
     canvas.id = id;
@@ -9,9 +9,7 @@ export function initializeCanvas(id: string): HTMLCanvasElement {
     canvas.height = CANVAS_SIZE_HEIGHT;
     canvas.style.border = '1px solid'
 
-    document.body.childNodes[1].after(canvas);
-    //document.body.appendChild(canvas);
-
+    container.appendChild(canvas);
     return canvas;
 }
 

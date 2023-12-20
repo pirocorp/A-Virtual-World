@@ -23,6 +23,10 @@ export class Segment implements ISegment {
         return this.includes(segment.pointA) && this.includes(segment.pointB);
     }
 
+    public includes(point: IPoint): boolean {
+        return this.pointA.equals(point) || this.pointB.equals(point);
+    }
+
     public draw(ctx: CanvasRenderingContext2D, width: number = 2, color: Color = Color.Black): void {
         ctx.beginPath();
         ctx.lineWidth = width;
@@ -30,9 +34,5 @@ export class Segment implements ISegment {
         ctx.moveTo(this._a.x, this._a.y);
         ctx.lineTo(this._b.x, this._b.y);
         ctx.stroke();
-    }
-
-    private includes(point: IPoint): boolean {
-        return this.pointA.equals(point) || this.pointB.equals(point);
     }
 }

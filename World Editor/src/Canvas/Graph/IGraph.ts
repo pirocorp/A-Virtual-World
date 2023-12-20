@@ -7,7 +7,11 @@ export interface IGraph {
 
     tryAddPoint(point: IPoint): boolean;
 
-    tryAddSegment(segment: ISegment): boolean
+    tryAddSegment(segment: ISegment): boolean;
 
-    draw(ctx: CanvasRenderingContext2D): void;
+    tryRemoveSegment(segment: ISegment): boolean;
+
+    tryRemovePoint(point: IPoint): boolean;
+
+    dispose(): void;
 }
