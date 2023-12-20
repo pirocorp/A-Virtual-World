@@ -1,6 +1,7 @@
 import { Color } from "../../Color";
 import { IPoint } from "../Point/IPoint";
 import { ISegment } from "./ISegment";
+import { ISegmentOptions } from "./ISegmentOptions";
 
 export class Segment implements ISegment {
     private readonly _a: IPoint;
@@ -19,7 +20,7 @@ export class Segment implements ISegment {
         return this._b;
     }
 
-    public equals(segment: ISegment): boolean {
+    public equals(segment: ISegment): boolean {        
         return this.includes(segment.pointA) && this.includes(segment.pointB);
     }
 
@@ -27,12 +28,17 @@ export class Segment implements ISegment {
         return this.pointA.equals(point) || this.pointB.equals(point);
     }
 
-    public draw(ctx: CanvasRenderingContext2D, width: number = 2, color: Color = Color.Black): void {
+    public draw(
+        ctx: CanvasRenderingContext2D, 
+        segmentOptions: ISegmentOptions = { width: 2, color: Color.Black, dash: [] }
+    ): void {
         ctx.beginPath();
-        ctx.lineWidth = width;
-        ctx.strokeStyle = color;
+        ctx.lineWidth = segmentOptions.width;
+        ctx.strokeStyle = segmentOptions.color;
+        ctx.setLineDash(segmentOptions.dash);
         ctx.moveTo(this._a.x, this._a.y);
         ctx.lineTo(this._b.x, this._b.y);
         ctx.stroke();
+        ctx.setLineDash([]);
     }
 }

@@ -1,4 +1,4 @@
-import { Color } from "../../Color";
+import { IPointOptions } from "./IPointOptions";
 
 export interface IPoint {
     x: number;
@@ -6,5 +6,9 @@ export interface IPoint {
 
     equals(point: IPoint): boolean;
 
-    draw(ctx: CanvasRenderingContext2D, size?: number, color?: Color): void;
+    distance(point: IPoint): number;
+
+    mutate(point: IPoint): void;
+
+    draw(ctx: CanvasRenderingContext2D, options?: IPointOptions): void
 }

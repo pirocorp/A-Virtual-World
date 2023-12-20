@@ -12,14 +12,14 @@ export class Graph implements IGraph{
     }
     
     public get points(): IPoint[] {
-        return this._points.map(x => x);
+        return this._points;
     }
 
     public get segments(): ISegment[] {
-        return this._segments.map(x => x);
+        return this._segments;
     }
 
-    public tryAddPoint(point: IPoint): boolean{
+    public tryAddPoint(point: IPoint): boolean {
         if(this.containsPoint(point)){
             return false;
         }
@@ -29,7 +29,8 @@ export class Graph implements IGraph{
     }
 
     public tryAddSegment(segment: ISegment): boolean{
-        if(this.containsSegment(segment) || segment.pointA.equals(segment.pointB)){
+        if(this.containsSegment(segment) 
+            || segment.pointA.equals(segment.pointB)) {
             return false;
         }
         

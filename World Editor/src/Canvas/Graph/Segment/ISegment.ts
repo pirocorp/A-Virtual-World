@@ -1,5 +1,5 @@
-import { Color } from "../../Color";
 import { IPoint } from "../Point/IPoint";
+import { ISegmentOptions } from "./ISegmentOptions";
 
 export interface ISegment {
     pointA: IPoint;
@@ -9,5 +9,5 @@ export interface ISegment {
 
     includes(point: IPoint): boolean;
 
-    draw(ctx: CanvasRenderingContext2D, width?: number, color?: Color): void;
+    draw(ctx: CanvasRenderingContext2D, segmentOptions?: ISegmentOptions): void;
 }
