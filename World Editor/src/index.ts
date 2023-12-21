@@ -1,6 +1,4 @@
-import { IGraph } from "./Canvas/Graph/IGraph";
 import { IGraphEditor } from "./Canvas/GraphEditor/IGraphEditor";
-import { Graph } from "./Canvas/Graph/Graph";
 import { GraphEditor } from "./Canvas/GraphEditor/GraphEditor";
 import { Point } from "./Canvas/Graph/Point/Point";
 import { Segment } from "./Canvas/Graph/Segment/Segment";
@@ -16,17 +14,12 @@ const s3 = new Segment(p1, p4);
 const s4 = new Segment(p2, p3);
 
 const canvasContainer = <HTMLElement>document.getElementById('canvas');
-
-const graph: IGraph = new Graph([p1, p2, p3, p4], [s1, s2, s3, s4]);
-const graphEditor: IGraphEditor = new GraphEditor(canvasContainer, graph);
+const graphEditor: IGraphEditor = new GraphEditor(canvasContainer, [p1, p2, p3, p4], [s1, s2, s3, s4]);
 
 animate();
 
 function animate(): void {
-    graphEditor.clearCanvas();
-    graphEditor.draw();
+    graphEditor.display();
 
     requestAnimationFrame(animate);
 }
-
-

@@ -1,13 +1,16 @@
 import { CANVAS_ID, CANVAS_SIZE_HEIGHT, CANVAS_SIZE_WIDTH } from "../../globalConstants";
 
-import { IGraph } from "../Graph/IGraph";
 import { IGraphEditor } from "./IGraphEditor";
+import { IViewport } from "../Viewport/IViewport";
 import { IPoint } from "../Graph/Point/IPoint";
 import { IPointOptions } from "../Graph/Point/IPointOptions";
 import { ISegment } from "../Graph/Segment/ISegment";
 import { ISegmentOptions } from "../Graph/Segment/ISegmentOptions";
+import { IGraph } from "../Graph/IGraph";
+import { Viewport } from "../Viewport/Viewport";
 import { Point } from "../Graph/Point/Point";
 import { Segment } from "../Graph/Segment/Segment";
+import { Graph } from "../Graph/Graph";
 import { Color } from "../Color";
 import { MouseButton } from "../MouseButton";
 
@@ -27,8 +30,8 @@ export class GraphEditor implements IGraphEditor {
 
     private readonly _canvasContainer: HTMLElement;
     private readonly _canvas: HTMLCanvasElement;
-    private readonly _context: CanvasRenderingContext2D;
     private readonly _graph: IGraph;
+    private readonly _viewport: IViewport
 
     private _selected: IPoint | null = null;
     private _hovered: IPoint | null = null;
@@ -37,76 +40,49 @@ export class GraphEditor implements IGraphEditor {
 
     constructor(
         canvasContainer: HTMLElement,
-        graph: IGraph) {
+        points: IPoint[] = [], 
+        segments: ISegment[] = []) {
         this._canvasContainer = canvasContainer;
-        this._graph = graph;
+        this._graph = new Graph(points, segments);
 
         this._canvas = this.initializeCanvas();
-        this._context = <CanvasRenderingContext2D>this._canvas.getContext('2d');
+        this._viewport = new Viewport(this._canvas);
 
         this.onMouseDownEventHandler = this.onMouseDownEventHandler.bind(this);
         this.onMouseMoveEventHandler = this.onMouseMoveEventHandler.bind(this);
         this.onContextMenuEventHandler = this.onContextMenuEventHandler.bind(this);
         this.onMouseUpEventHandler = this.onMouseUpEventHandler.bind(this);
 
+        this.draw = this.draw.bind(this);
+
         this.addEventListeners();
     }
 
-    public addRandomSegment(): void {
-        if(this._graph.points.length < 2){
-            return
-        }
-    
-        const index1 = Math.floor(Math.random() * this._graph.points.length);
-        const index2 = Math.floor(Math.random() * this._graph.points.length);
-    
-        const point1 = this._graph.points[index1];
-        const point2 = this._graph.points[index2];
-    
-        const segment = new Segment(point1, point2);
-    
-        this._graph.tryAddSegment(segment); 
+    public display(): void {
+        this._viewport.reset();
+        this.draw(this._viewport.context);    
     }
 
-    public removeRandomSegment(): void {
-        if(this._graph.segments.length == 0){   
-            return;
-        }
-    
-        const index = Math.floor(Math.random() * this._graph.segments.length);
-        const segment = this._graph.segments[index];
-    
-        this._graph.tryRemoveSegment(segment);
-    }
-
-    public removeAll(): void {
-        this._graph.dispose();
-    }
-
-    public draw(): void {
+    private draw(ctx: CanvasRenderingContext2D): void {
         for(const segment of this._graph.segments){
-            segment.draw(this._context);
+            segment.draw(ctx);
         }
 
         for(const point of this._graph.points){
-            point.draw(this._context, this._pointOptions);
+            point.draw(ctx, this._pointOptions);
         }
 
         if(this._selected) {
-            this._selected.draw(this._context, { ... this._pointOptions, outline: true });
+            this._selected.draw(ctx, { ... this._pointOptions, outline: true });
 
             const intent = this._hovered ?? this._mouse;
             const segment = new Segment(this._selected, intent);
-            segment.draw(this._context, {... this._segmentOptions, dash: [3, 3] });
+            segment.draw(ctx, {... this._segmentOptions, dash: [3, 3] });
         }
 
         if(this._hovered) {
-            this._hovered.draw(this._context, { ... this._pointOptions, fill: true });
+            this._hovered.draw(ctx, { ... this._pointOptions, fill: true });
         }
-    }
-
-    public clearCanvas(): void {
-        this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     }
 
     private initializeCanvas(): HTMLCanvasElement {
@@ -129,18 +105,20 @@ export class GraphEditor implements IGraphEditor {
     }
 
     private onMouseDownEventHandler(mouseEvent: MouseEvent): void {
-        if(mouseEvent.button == MouseButton.RigthClick) {           
+        if(mouseEvent.button == MouseButton.RigthButton) {           
             this.handleRightClick();
         }
 
-        if(mouseEvent.button == MouseButton.LeftClick) {
+        if(mouseEvent.button == MouseButton.LeftButton) {
             this.handleLeftClick();
         }        
     } 
     
     private onMouseMoveEventHandler(mouseEvent: MouseEvent): void {
-        this._mouse = new Point(mouseEvent.offsetX, mouseEvent.offsetY);
-        this._hovered = Point.getNearestPoint(this._mouse, this._graph.points, this._pointTresholdDistance);
+        this._mouse = this._viewport.getMouse(mouseEvent, true);
+
+        const adaptiveThreshold = this._pointTresholdDistance * this._viewport.zoom;
+        this._hovered = Point.getNearestPoint(this._mouse, this._graph.points, adaptiveThreshold);
 
         if(this._dragging == true) {
             this._selected?.mutate(this._mouse);

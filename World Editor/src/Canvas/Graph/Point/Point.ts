@@ -26,8 +26,20 @@ export class Point implements IPoint {
         return this._x === point.x && this._y === point.y;
     }
 
+    public add(point: IPoint): IPoint {
+        return new Point(this._x + point.x, this._y + point.y);
+    }
+
+    public subtract(point: IPoint): IPoint {
+        return new Point(this._x - point.x, this._y - point.y);
+    }
+
     public distance(point: IPoint): number {
         return Math.hypot(this._x - point.x, this._y - point.y);
+    }
+
+    public scale(scale: number): IPoint {
+        return new Point(this._x * scale, this._y * scale);
     }
 
     public mutate(point: IPoint): void {

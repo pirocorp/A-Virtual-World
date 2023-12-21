@@ -1,4 +1,5 @@
 export enum MouseButton {
-    LeftClick = 0,
-    RigthClick = 2
+    LeftButton = 0,
+    MiddleButton = 1,
+    RigthButton = 2
 }

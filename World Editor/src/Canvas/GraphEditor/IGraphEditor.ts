@@ -1,5 +1,5 @@
-export interface IGraphEditor {
-    draw(): void;
+import { IViewport } from "../Viewport/IViewport";
 
-    clearCanvas(): void;
+export interface IGraphEditor {
+    display(): void;
 }
