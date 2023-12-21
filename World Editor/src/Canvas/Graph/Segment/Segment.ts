@@ -1,5 +1,7 @@
 import { Color } from "../../Color";
+import { IStoredSegment } from "../../StoredGraph/IStoredSegment";
 import { IPoint } from "../Point/IPoint";
+import { Point } from "../Point/Point";
 import { ISegment } from "./ISegment";
 import { ISegmentOptions } from "./ISegmentOptions";
 

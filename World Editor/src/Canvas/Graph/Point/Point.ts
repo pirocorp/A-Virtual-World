@@ -1,6 +1,7 @@
 import { IPoint } from "./IPoint";
 import { IPointOptions } from "./IPointOptions";
 import { Color } from "../../Color";
+import { IStoredPoint } from "../../StoredGraph/IStoredPoint";
 
 export class Point implements IPoint {
 
@@ -92,5 +93,9 @@ export class Point implements IPoint {
         }
 
         return nearest;
+    }
+
+    public static parse (point: IStoredPoint) {
+        return new Point(point._x, point._y);
     }
 }

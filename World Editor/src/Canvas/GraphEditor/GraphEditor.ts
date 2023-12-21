@@ -7,14 +7,17 @@ import { IPointOptions } from "../Graph/Point/IPointOptions";
 import { ISegment } from "../Graph/Segment/ISegment";
 import { ISegmentOptions } from "../Graph/Segment/ISegmentOptions";
 import { IGraph } from "../Graph/IGraph";
+import { IStoredGraph } from "../StoredGraph/IStoredGraph";
 import { Viewport } from "../Viewport/Viewport";
 import { Point } from "../Graph/Point/Point";
 import { Segment } from "../Graph/Segment/Segment";
 import { Graph } from "../Graph/Graph";
 import { Color } from "../Color";
 import { MouseButton } from "../MouseButton";
+import { IStoredPoint } from "../StoredGraph/IStoredPoint";
 
 export class GraphEditor implements IGraphEditor {
+    private readonly _localStorageKey = 'graph';
     private readonly _pointTresholdDistance: number = 10;
     private readonly _pointOptions: IPointOptions = { 
         size: 18, 
@@ -29,6 +32,7 @@ export class GraphEditor implements IGraphEditor {
     };
 
     private readonly _canvasContainer: HTMLElement;
+    private readonly _controlsContainer: HTMLElement;
     private readonly _canvas: HTMLCanvasElement;
     private readonly _graph: IGraph;
     private readonly _viewport: IViewport
@@ -40,9 +44,12 @@ export class GraphEditor implements IGraphEditor {
 
     constructor(
         canvasContainer: HTMLElement,
+        controlsContainer: HTMLElement,
         points: IPoint[] = [], 
         segments: ISegment[] = []) {
         this._canvasContainer = canvasContainer;
+        this._controlsContainer = controlsContainer;
+
         this._graph = new Graph(points, segments);
 
         this._canvas = this.initializeCanvas();
@@ -52,10 +59,15 @@ export class GraphEditor implements IGraphEditor {
         this.onMouseMoveEventHandler = this.onMouseMoveEventHandler.bind(this);
         this.onContextMenuEventHandler = this.onContextMenuEventHandler.bind(this);
         this.onMouseUpEventHandler = this.onMouseUpEventHandler.bind(this);
+        this.onSaveButtonClickHandler = this.onSaveButtonClickHandler.bind(this);
+        this.onDeleteButtonClickHandler = this.onDeleteButtonClickHandler.bind(this);
 
         this.draw = this.draw.bind(this);
-
+        
         this.addEventListeners();
+        this.loadControls();
+
+        this.loadSavedGraph();
     }
 
     public display(): void {
@@ -133,6 +145,14 @@ export class GraphEditor implements IGraphEditor {
         mouseEvent.preventDefault();
     }
 
+    private onSaveButtonClickHandler(event: MouseEvent): void {
+        localStorage.setItem(this._localStorageKey, JSON.stringify(this._graph));     
+    }
+
+    private onDeleteButtonClickHandler(event: MouseEvent): void {
+        this.dispose();  
+    }
+
     private handleLeftClick(): void {
         if(this._hovered) {
             this.selectPoint(this._hovered);
@@ -157,7 +177,7 @@ export class GraphEditor implements IGraphEditor {
         }
     }
 
-    private selectPoint(point: IPoint) {
+    private selectPoint(point: IPoint): void {
         if(this._selected){
             const segment: ISegment = new Segment(this._selected, point);                                     
             this._graph.tryAddSegment(segment);
@@ -166,12 +186,61 @@ export class GraphEditor implements IGraphEditor {
         this._selected = point;
     }
 
-    private removePoint(point: IPoint) {
+    private removePoint(point: IPoint): void {
         this._graph.tryRemovePoint(point);
         this._hovered = null; 
 
         if(this._selected == point){
             this._selected = null;
         }
+    }
+
+    private dispose(): void {
+        this._graph.dispose();
+        this._hovered = null;
+        this._selected = null;
+    }
+
+    private loadControls(): void {
+        const saveGraphButton = document.createElement('button');
+        saveGraphButton.textContent = '💾';
+        saveGraphButton.addEventListener('click', this.onSaveButtonClickHandler);
+
+        const deleteGraphButton = document.createElement('button');
+        deleteGraphButton.textContent = '🗑️';
+        deleteGraphButton.addEventListener('click', this.onDeleteButtonClickHandler);
+
+        this._controlsContainer.appendChild(saveGraphButton);
+        this._controlsContainer.appendChild(deleteGraphButton);
+    }
+
+    private loadSavedGraph(): void {
+        const graphString: string| null = localStorage.getItem("graph");
+        const graphInfo : IStoredGraph | null = graphString 
+            ? JSON.parse(graphString)
+            : null;
+
+        if(graphInfo){
+            this._graph.dispose();     
+            
+            graphInfo._points
+                .map(Point.parse)
+                .forEach(x => this._graph.tryAddPoint(x));
+
+            for (const segmentInfo of graphInfo._segments) {
+                const pointA = <IPoint>this.findPointInGraph(segmentInfo._a);
+                const pointB = <IPoint>this.findPointInGraph(segmentInfo._b);
+                const segment = new Segment(pointA, pointB)
+
+                this._graph.tryAddSegment(segment);
+            }
+        }
+    }
+
+    private findPointInGraph(point: IStoredPoint): IPoint | undefined  {
+        const pointA = this._graph.points
+            .find(p => p.x === point._x && p.y === point._y);
+
+        return pointA;
     }
 }
