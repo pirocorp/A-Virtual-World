@@ -1,6 +1,6 @@
 import { IPoint } from "./IPoint";
 import { IPointOptions } from "./IPointOptions";
-import { IStoredPoint } from "../../StoredGraph/IStoredPoint";
+import { IStoredPoint } from "../StoredGraph/IStoredPoint";
 import { Color } from "../../Canvas/Color";
 
 export class Point implements IPoint {
