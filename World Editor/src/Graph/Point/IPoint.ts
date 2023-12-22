@@ -6,13 +6,17 @@ export interface IPoint {
 
     equals(point: IPoint): boolean;
 
+    distance(point: IPoint): number;
+
+    angle(): number;
+
     add(point: IPoint): IPoint;
 
     subtract(point: IPoint): IPoint;
 
-    distance(point: IPoint): number;
-
     scale(scale: number): IPoint;
+
+    translate(angle: number, offset: number): IPoint;
 
     mutate(point: IPoint): void;
 

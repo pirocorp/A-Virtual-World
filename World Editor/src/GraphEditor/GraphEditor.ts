@@ -1,35 +1,20 @@
-import { CANVAS_ID, CANVAS_SIZE_HEIGHT, CANVAS_SIZE_WIDTH } from "../../globalConstants";
-
 import { IGraphEditor } from "./IGraphEditor";
-import { IViewport } from "../Viewport/IViewport";
 import { IPoint } from "../Graph/Point/IPoint";
-import { IPointOptions } from "../Graph/Point/IPointOptions";
 import { ISegment } from "../Graph/Segment/ISegment";
-import { ISegmentOptions } from "../Graph/Segment/ISegmentOptions";
 import { IGraph } from "../Graph/IGraph";
 import { IStoredGraph } from "../StoredGraph/IStoredGraph";
-import { Viewport } from "../Viewport/Viewport";
 import { Point } from "../Graph/Point/Point";
 import { Segment } from "../Graph/Segment/Segment";
 import { Graph } from "../Graph/Graph";
-import { Color } from "../Color";
-import { MouseButton } from "../MouseButton";
 import { IStoredPoint } from "../StoredGraph/IStoredPoint";
+import { IViewport } from "../Canvas/Viewport/IViewport";
+import { Viewport } from "../Canvas/Viewport/Viewport";
+import { CANVAS_ID, CANVAS_SIZE_HEIGHT, CANVAS_SIZE_WIDTH } from "../globalConstants";
+import { MouseButton } from "../Canvas/MouseButton";
 
 export class GraphEditor implements IGraphEditor {
     private readonly _localStorageKey = 'graph';
     private readonly _pointTresholdDistance: number = 10;
-    private readonly _pointOptions: IPointOptions = { 
-        size: 18, 
-        color: Color.Black, 
-        outline: false,
-        fill: false 
-    };
-    private readonly _segmentOptions: ISegmentOptions = {
-        width: 2,
-        color: Color.Black,
-        dash: []
-    };
 
     private readonly _canvasContainer: HTMLElement;
     private readonly _controlsContainer: HTMLElement;
@@ -69,6 +54,14 @@ export class GraphEditor implements IGraphEditor {
 
         this.loadSavedGraph();
     }
+    
+    public get context(): CanvasRenderingContext2D {
+        return this._viewport.context;
+    }
+
+    public get graph(): IGraph {
+        return this._graph;
+    }
 
     public display(): void {
         this._viewport.reset();
@@ -81,19 +74,19 @@ export class GraphEditor implements IGraphEditor {
         }
 
         for(const point of this._graph.points){
-            point.draw(ctx, this._pointOptions);
+            point.draw(ctx);
         }
 
         if(this._selected) {
-            this._selected.draw(ctx, { ... this._pointOptions, outline: true });
+            this._selected.draw(ctx, { outline: true });
 
             const intent = this._hovered ?? this._mouse;
             const segment = new Segment(this._selected, intent);
-            segment.draw(ctx, {... this._segmentOptions, dash: [3, 3] });
+            segment.draw(ctx, { dash: [3, 3] });
         }
 
         if(this._hovered) {
-            this._hovered.draw(ctx, { ... this._pointOptions, fill: true });
+            this._hovered.draw(ctx, { fill: true });
         }
     }
 
@@ -227,9 +220,9 @@ export class GraphEditor implements IGraphEditor {
                 .map(Point.parse)
                 .forEach(x => this._graph.tryAddPoint(x));
 
-            for (const segmentInfo of graphInfo._segments) {
-                const pointA = <IPoint>this.findPointInGraph(segmentInfo._a);
-                const pointB = <IPoint>this.findPointInGraph(segmentInfo._b);
+            for (const segmentInfo of graphInfo._segments) {  
+                const pointA = <IPoint>this.findPointInGraph(segmentInfo.pointA);
+                const pointB = <IPoint>this.findPointInGraph(segmentInfo.pointB);
                 const segment = new Segment(pointA, pointB)
 
                 this._graph.tryAddSegment(segment);
@@ -237,7 +230,7 @@ export class GraphEditor implements IGraphEditor {
         }
     }
 
-    private findPointInGraph(point: IStoredPoint): IPoint | undefined  {
+    private findPointInGraph(point: IStoredPoint): IPoint | undefined  {      
         const pointA = this._graph.points
             .find(p => p.x === point._x && p.y === point._y);
 

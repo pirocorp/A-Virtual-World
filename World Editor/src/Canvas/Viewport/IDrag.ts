@@ -1,4 +1,4 @@
-import { IPoint } from "../Graph/Point/IPoint";
+import { IPoint } from "../../Graph/Point/IPoint";
 
 export interface IDrag {
     start: IPoint,

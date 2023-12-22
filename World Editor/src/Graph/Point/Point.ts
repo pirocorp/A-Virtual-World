@@ -1,9 +1,15 @@
 import { IPoint } from "./IPoint";
 import { IPointOptions } from "./IPointOptions";
-import { Color } from "../../Color";
 import { IStoredPoint } from "../../StoredGraph/IStoredPoint";
+import { Color } from "../../Canvas/Color";
 
 export class Point implements IPoint {
+    private readonly _defaultOptions: IPointOptions = {
+        size: 18, 
+        color: Color.Black, 
+        outline: false,
+        fill: false 
+    }
 
     private _x: number;
     private _y: number;
@@ -27,6 +33,14 @@ export class Point implements IPoint {
         return this._x === point.x && this._y === point.y;
     }
 
+    public distance(point: IPoint): number {
+        return Math.hypot(this._x - point.x, this._y - point.y);
+    }
+
+    public angle(): number {
+        return Math.atan2(this._y, this._x);
+    }
+
     public add(point: IPoint): IPoint {
         return new Point(this._x + point.x, this._y + point.y);
     }
@@ -35,12 +49,15 @@ export class Point implements IPoint {
         return new Point(this._x - point.x, this._y - point.y);
     }
 
-    public distance(point: IPoint): number {
-        return Math.hypot(this._x - point.x, this._y - point.y);
-    }
-
     public scale(scale: number): IPoint {
         return new Point(this._x * scale, this._y * scale);
+    }
+
+    public translate(angle: number, offset: number): IPoint {
+        return new Point(
+            this._x + Math.cos(angle) * offset,
+            this._y + Math.sin(angle) * offset
+        );
     }
 
     public mutate(point: IPoint): void {
@@ -50,16 +67,14 @@ export class Point implements IPoint {
 
     public draw(
         ctx: CanvasRenderingContext2D, 
-        options: IPointOptions = {
-            size: 18, 
-            color: Color.Black, 
-            outline: false,
-            fill: false 
-        }): void {    
-        const radius = options.size / 2;
+        options?: IPointOptions
+    ): void {  
+        options = {... this._defaultOptions, ...options}
+
+        const radius = options.size! / 2;
 
         ctx.beginPath();
-        ctx.fillStyle = options.color;
+        ctx.fillStyle = options.color!;
         ctx.arc(this._x, this._y, radius, 0, Math.PI * 2);
         ctx.fill();
         
@@ -97,5 +112,9 @@ export class Point implements IPoint {
 
     public static parse (point: IStoredPoint) {
         return new Point(point._x, point._y);
+    }
+
+    public static angle(point: {x: number, y: number}): number {
+        return Math.atan2(point.y, point.x);
     }
 }

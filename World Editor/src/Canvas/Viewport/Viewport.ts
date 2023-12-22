@@ -1,8 +1,8 @@
 import { IViewport } from "./IViewport";
-import { IPoint } from "../Graph/Point/IPoint";
-import { Point } from "../Graph/Point/Point";
 import { IDrag } from "./IDrag";
 import { MouseButton } from "../MouseButton";
+import { IPoint } from "../../Graph/Point/IPoint";
+import { Point } from "../../Graph/Point/Point";
 
 export class Viewport implements IViewport {
     private readonly _zoomStep = 0.1;
